@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/expense_provider.dart';
 import 'screens/home/home_screen.dart';
 
 void main() {
@@ -10,10 +12,13 @@ class BolsilloApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Bolsillo',
-      debugShowCheckedModeBanner: false,
-      home: const HomeScreen(),
+    return ChangeNotifierProvider(
+      create: (_) => ExpenseProvider(),
+      child: MaterialApp(
+        title: 'Bolsillo',
+        debugShowCheckedModeBanner: false,
+        home: const HomeScreen(),
+      ),
     );
   }
 }
