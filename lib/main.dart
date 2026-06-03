@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'config/app_theme.dart';
 import 'providers/expense_provider.dart';
 import 'screens/home/home_screen.dart';
 
@@ -17,6 +18,7 @@ class BolsilloApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Bolsillo',
         debugShowCheckedModeBanner: false,
+        theme: AppTheme.theme,
         home: const HomeScreen(),
       ),
     );
