@@ -62,4 +62,12 @@ class ExpenseProvider extends ChangeNotifier {
     final now = DateTime.now();
     await loadMonthlyExpenses(now.year, now.month);
   }
+
+  // Actualiza un gasto y recarga las listas
+  Future<void> updateExpense(Expense expense) async {
+    await _repository.updateExpense(expense);
+    await loadAllExpenses();
+    final now = DateTime.now();
+    await loadMonthlyExpenses(now.year, now.month);
+  }
 }

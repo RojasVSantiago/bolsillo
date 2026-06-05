@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/expense_provider.dart';
 import '../add/add_screen.dart';
+import '../../config/formatters.dart';
 import '../history/history_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,8 +17,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     final now = DateTime.now();
-    Future.microtask(() =>
-        context.read<ExpenseProvider>().loadMonthlyExpenses(now.year, now.month));
+    Future.microtask(
+      () => context.read<ExpenseProvider>().loadMonthlyExpenses(
+        now.year,
+        now.month,
+      ),
+    );
   }
 
   @override
@@ -50,7 +55,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       'Por categoría',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ),
@@ -63,7 +71,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             final category = totals.keys.elementAt(index);
                             final amount = totals.values.elementAt(index);
                             return _CategoryTile(
-                                category: category, amount: amount);
+                              category: category,
+                              amount: amount,
+                            );
                           },
                         ),
                 ),
@@ -89,8 +99,18 @@ class _TotalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final months = [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
     ];
 
     return Card(
@@ -105,7 +125,7 @@ class _TotalCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              '\$${grandTotal.toStringAsFixed(0)}',
+              AppFormatters.amount(grandTotal),
               style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
             const Text('Total del mes'),
@@ -127,7 +147,8 @@ class _CategoryTile extends StatelessWidget {
     return ListTile(
       title: Text(category),
       trailing: Text(
-        '\$${amount.toStringAsFixed(0)}',
+        AppFormatters.amount(amount),
+
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
     );

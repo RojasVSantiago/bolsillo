@@ -5,7 +5,10 @@ import '../../models/expense.dart';
 import '../../providers/expense_provider.dart';
 
 class AddScreen extends StatefulWidget {
-  const AddScreen({super.key});
+  // Si expense no es null, la pantalla entra en modo edición
+  final Expense? expense;
+
+  const AddScreen({super.key, this.expense});
 
   @override
   State<AddScreen> createState() => _AddScreenState();
@@ -19,6 +22,21 @@ class _AddScreenState extends State<AddScreen> {
   String _selectedCategory = AppCategories.all.first;
   DateTime _selectedDate = DateTime.now();
   bool _isSaving = false;
+
+  // Indica si estamos editando un gasto existente
+  bool get _isEditing => widget.expense != null;
+
+  @override
+  void initState() {
+    super.initState();
+    // Si hay un gasto existente, prellenar los campos
+    if (_isEditing) {
+      _amountController.text = widget.expense!.amount.toStringAsFixed(0);
+      _noteController.text = widget.expense!.note ?? '';
+      _selectedCategory = widget.expense!.category;
+      _selectedDate = widget.expense!.date;
+    }
+  }
 
   @override
   void dispose() {
@@ -40,13 +58,14 @@ class _AddScreenState extends State<AddScreen> {
     }
   }
 
-  // Valida el formulario, guarda el gasto y cierra la pantalla
+  // Valida el formulario, guarda o actualiza el gasto y cierra la pantalla
   Future<void> _saveExpense() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSaving = true);
 
     final expense = Expense(
+      id: _isEditing ? widget.expense!.id : null,
       amount: double.parse(_amountController.text.trim()),
       category: _selectedCategory,
       date: _selectedDate,
@@ -55,7 +74,11 @@ class _AddScreenState extends State<AddScreen> {
           : _noteController.text.trim(),
     );
 
-    await context.read<ExpenseProvider>().addExpense(expense);
+    if (_isEditing) {
+      await context.read<ExpenseProvider>().updateExpense(expense);
+    } else {
+      await context.read<ExpenseProvider>().addExpense(expense);
+    }
 
     if (mounted) Navigator.pop(context);
   }
@@ -63,13 +86,15 @@ class _AddScreenState extends State<AddScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Agregar gasto')),
+      appBar: AppBar(
+        title: Text(_isEditing ? 'Editar gasto' : 'Agregar gasto'),
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Campo: monto
+            // Campo monto
             TextFormField(
               controller: _amountController,
               keyboardType: TextInputType.number,
@@ -93,7 +118,7 @@ class _AddScreenState extends State<AddScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Selector: categoría
+            // Selector de categoría
             DropdownButtonFormField<String>(
               value: _selectedCategory,
               decoration: const InputDecoration(
@@ -109,7 +134,7 @@ class _AddScreenState extends State<AddScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Selector: fecha
+            // Selector de fecha
             InkWell(
               onTap: _pickDate,
               child: InputDecorator(
@@ -125,7 +150,7 @@ class _AddScreenState extends State<AddScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Campo: nota
+            // Campo nota (opcional)
             TextFormField(
               controller: _noteController,
               decoration: const InputDecoration(
@@ -136,7 +161,7 @@ class _AddScreenState extends State<AddScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Botón: guardar
+            // Botón guardar o actualizar
             FilledButton(
               onPressed: _isSaving ? null : _saveExpense,
               child: _isSaving
@@ -145,7 +170,7 @@ class _AddScreenState extends State<AddScreen> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Guardar gasto'),
+                  : Text(_isEditing ? 'Actualizar gasto' : 'Guardar gasto'),
             ),
           ],
         ),
